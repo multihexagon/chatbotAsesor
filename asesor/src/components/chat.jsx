@@ -1,9 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { io } from "socket.io-client";
+const getUser = async() => {
+
+  let user = localStorage.getItem('user')
+  if (!user){
+    const req = await fetch('https://randomuser.me/api/')
+
+    const res = await req.json()
+
+    const {login : {username} } = res.results[0]
+
+    user = username
+    localStorage.setItem('user',user)
+  }
+
+  return user
+
+};
+
+
+const socket = io("http://localhost:3000", { auth: { token: await getUser() } });
 
 const Chat = () => {
   const [messages, setMessages] = useState([
-    { sender: 'Usuario', text: 'Hola buen día, tengo un problema con mi suscripción!' },
-    { sender: 'Tú', text: 'Hola buenos dias, claro que sí, será un placer ayudarte' },
+    { from: 'Usuario', text: 'Hola buen día, tengo un problema con mi suscripción!' },
+    { from: 'Tú', text: 'Hola buenos dias, claro que sí, será un placer ayudarte' },
   ]);
 
   const messagesContainerRef = useRef(null);
@@ -12,24 +33,44 @@ const Chat = () => {
     return messages.map((message, index) => (
       <div
         key={index}
-        style={{ marginBottom: '10px', textAlign: message.sender === 'Usuario' ? 'left' : 'right', backgroundColor: message.sender === 'Usuario' ? '#eee' : '#0084ff', color: message.sender === 'Usuario' ? '#000' : '#fff', padding: '10px', borderRadius: '5px' }}
+        style={{ marginBottom: '10px', textAlign: message.from === 'Usuario' ? 'left' : 'right', backgroundColor: message.from === 'Usuario' ? '#eee' : '#0084ff', color: message.from === 'Usuario' ? '#000' : '#fff', padding: '10px', borderRadius: '5px' }}
       >
-        <strong>{message.sender}:</strong> {message.text}
+        <strong>{message.from}:</strong> {message.text}
       </div>
     ));
   };
 
+  function addMessage(text, setter) {
+    if (text === "" || text.startsWith(" ")) return;
+    const newMessage = {
+      from: "user",
+      text,
+    };
+    setter((lastValue) => ({
+      ...lastValue,
+      messages: [...lastValue.messages, newMessage],
+      currentMessage: "",
+    }));
+    socket.emit("new message", { message: newMessage, userType: 'user' });
+  }
+
   const handleSendMessage = () => {
     const inputElement = document.getElementById('messageInput');
-    const newMessage = { sender: 'Tú', text: inputElement.value };
+    const newMessage = { from: 'Tú', text: inputElement.value };
     setMessages([...messages, newMessage]);
-    inputElement.value = ''; 
+    inputElement.value = '';
+    socket.emit("new message", { message: newMessage, userType: 'adviser' });
   };
 
   useEffect(() => {
-
+    socket.emit("join", { room: 'asesor' });
     messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
   }, [messages]);
+
+
+  
+
+
 
   return (
     <div style={{ maxWidth: '500px', margin: 'auto', fontFamily: 'Arial, sans-serif' }}>
