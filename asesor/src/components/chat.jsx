@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './chat.css';
 
 const Chat = () => {
-  const [activeChat, setActiveChat] = useState('Chat1'); // Default active chat
+  const [activeChat, setActiveChat] = useState('Chat1');
   const [chats, setChats] = useState({
     Chat1: [
       { sender: 'Usuario', text: 'Hello! How can I help you today?' },
@@ -12,7 +12,6 @@ const Chat = () => {
       { sender: 'Usuario', text: 'Welcome to Chat 2!' },
       { sender: 'You', text: 'How can I assist you?' },
     ],
-    // Add more chats as needed
   });
 
   const messagesContainerRef = useRef(null);
@@ -34,11 +33,10 @@ const Chat = () => {
     const currentChat = chats[activeChat] || [];
     const newMessage = { sender: 'You', text: inputElement.value };
     setChats({ ...chats, [activeChat]: [...currentChat, newMessage] });
-    inputElement.value = ''; // Clear the input field
+    inputElement.value = '';
   };
 
   useEffect(() => {
-    // Scroll to the bottom when messages change
     messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
   }, [chats, activeChat]);
 
