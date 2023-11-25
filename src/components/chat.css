@@ -1,0 +1,17 @@
+.button {
+  cursor: pointer;
+  border-radius: 50px;
+  border: 1.8px solid blueviolet;
+  width: 60px;
+  height: 40px;
+  color: white;
+  background-color: rgb(181, 150, 255);
+}
+
+.button svg {
+  transition: all 0.3s;
+}
+
+.button:hover svg {
+  transform: rotate(45deg);
+}
