@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import "./chat.css";
 import { useChatContext } from "../../context/useChatContext";
-import ChatList from "../../context/chatList";
 import RenderMessages from "../messages/messages";
 import RenderTabs from "../tabs/tabs";
 
@@ -61,13 +60,13 @@ const Chat = () => {
   }, [chatData]);
 
   // useEffect(() => {}, []);
-
+  console.log(chatData)
   return (
     <main style={{ display: "flex" }}>
       {/* Sidebar with tabs */}
       <article className="article" style={{ borderRight: "1px solid #9966CC" }}>
         {/* <ChatList chats={chatData.chats} currentChat={chatData.currentChat} setChat={setChatData} /> */}
-        <RenderTabs chats={chatData.chats} activeChat={chatData.currentChat} setChat={setChatData} />
+        <RenderTabs chats={chatData.chats} activeChat={chatData.currentChat} setChat={setChatData}/>
       </article>
       {/* Chat messages */}
       <article
@@ -91,7 +90,7 @@ const Chat = () => {
             padding: "10px"
           }}
         >
-          <RenderMessages chats={chatData.chats[chatData.currentChat]} />
+          <RenderMessages chats={chatData.chats[chatData.currentChat]} socket={socket} setChat={setChatData} chatId={"ana"}/>
         </div>
         <div style={{ marginTop: "20px", display: "flex" }}>
           <input

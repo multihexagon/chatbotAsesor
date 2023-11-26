@@ -1,4 +1,25 @@
-const RenderMessages = ({ chats }) => {
+import { useEffect } from "react";
+const RenderMessages = ({ chats, socket, setChat, chatId}) => {
+  useEffect(() => {
+    socket.on("new message", ({ message, error }) => {
+      if (error) {
+        alert(error)
+        return
+      }
+      setChat((lastValue) => ({
+        ...lastValue,
+        chats: {
+          ...lastValue.chats,
+          [chatId]: {
+            ...lastValue.chats[chatId],
+            messages: [...lastValue.chats[chatId].messages, message],
+          },
+        },
+      }));
+    });
+  }, []);
+  console.log(chats.messages)
+
   return chats?.messages ? chats.messages.map((message, index) => (
     <div
       key={index}
