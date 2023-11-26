@@ -9,9 +9,8 @@ export default function ChatContextProvider({ children }) {
     currentChat: "",
     currentMessage: "",
     chats: {
-      beautifulbear436 : {
-        messages: [
-        ],
+      beautifulbear436: {
+        messages: [],
       },
       juan: {
         messages: [],

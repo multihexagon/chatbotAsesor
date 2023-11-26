@@ -1,5 +1,4 @@
-import React from "react";
-import "./tabs.css";
+// import "./tabs.css";
 
 const RenderTabs = ({ chats, activeChat, setChat, socket }) => {
   function handleClick(chatId) {
@@ -12,14 +11,16 @@ const RenderTabs = ({ chats, activeChat, setChat, socket }) => {
 
   return Object.keys(chats).map((chatId) => (
     <div
+      className={`clients ${chatId === activeChat && "selected"}`}
       key={chatId}
       onClick={() => handleClick(chatId)}
-      style={{
-        padding: "10px",
-        borderBottom:
-          activeChat === chatId ? "2px solid #4CAF50" : "2px solid transparent",
-        cursor: "pointer",
-      }}
+      // style={{
+      //   padding: "10px",
+      //   // borderBottom:
+      //   //   activeChat === chatId ? "2px solid #4CAF50" : "2px solid transparent",
+
+      //   cursor: "pointer",
+      // }}
     >
       {chatId}
     </div>

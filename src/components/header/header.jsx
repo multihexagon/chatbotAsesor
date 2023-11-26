@@ -1,6 +1,5 @@
-import React from 'react';
-import Icon_dark from '../../assets/logoSeftyClub.png';
-import './header.css';
+import Icon_dark from "../../assets/logoSeftyClub.png";
+import "./header.css";
 
 const Header = () => {
   return (
@@ -8,6 +7,6 @@ const Header = () => {
       <img src={Icon_dark} alt="" />
     </div>
   );
-}
+};
 
 export default Header;

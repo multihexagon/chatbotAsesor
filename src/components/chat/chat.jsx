@@ -55,20 +55,24 @@ const Chat = () => {
   const messagesContainerRef = useRef(null);
 
   useEffect(() => {
-    messagesContainerRef.current.scrollTop =
-      messagesContainerRef.current.scrollHeight;
+    if (messagesContainerRef.current !== null) {
+      console.log(messagesContainerRef)
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
+    }
   }, [chatData]);
 
   useEffect(() => {
     socket.on("new message client get", ({ message }) => {
-      const messages = [
-        ...chatData.chats[chatData.currentChat].messages,
-        message,
-      ];
-
-      setChatData({
-        ...chatData,
-        chats: { ...chatData.chats, [chatData.currentChat]: { messages } },
+      setChatData((lastValue) => {
+        const messages = [
+          ...lastValue.chats[lastValue.currentChat].messages,
+          message,
+        ];
+        return {
+          ...lastValue,
+          chats: { ...lastValue.chats, [lastValue.currentChat]: { messages } },
+        };
       });
     });
 
@@ -80,12 +84,12 @@ const Chat = () => {
       socket.off("new message client get");
       socket.off("client");
     };
-  }, [chatData]);
+  }, []);
 
   return (
-    <main style={{ display: "flex" }}>
+    <main>
       {/* Sidebar with tabs */}
-      <article style={{ width: "200px", borderRight: "1px solid #ccc" }}>
+      <article className="tabs">
         <RenderTabs
           chats={chatData.chats}
           activeChat={chatData.currentChat}
@@ -94,90 +98,74 @@ const Chat = () => {
         />
       </article>
       {/* Chat messages */}
-      <article
-        className="article-big"
-        style={{
-          flex: "1",
-          maxWidth: "800px",
-          margin: "auto",
-          fontFamily: "Arial, sans-serif",
-          border: "none",
-          marginTop: "45vh",
-        }}
-      >
-        <div
-          className="messages-container"
-          ref={messagesContainerRef}
-          style={{
-            height: "300px",
-            borderRadius: "5px",
-            overflowY: "scroll",
-            padding: "10px",
-          }}
-        >
-          <RenderMessages chats={chatData.chats[chatData.currentChat]} />
-        </div>
-        <div style={{ marginTop: "20px", display: "flex" }}>
-          <input
-            id="messageInput"
-            type="text"
-            placeholder="Type your message..."
-            style={{
-              flex: "1",
-              color: "#fff",
-              height: "30px",
-              fontSize: "16px",
-              border: "1px solid #ccc",
-              borderRadius: "5px 0 0 5px",
-              backgroundColor: "transparent",
-              padding: "5px",
-              outline: "none",
-            }}
-            value={chatData?.currentMessage}
-            onChange={(e) =>
-              setChatData((lastValue) => ({
-                ...lastValue,
-                currentMessage: e.target.value,
-              }))
-            }
-            onKeyDown={(e) => {
-              if (e.which === 13 && !e.shiftKey) {
-                e.preventDefault();
+
+      {chatData.currentChat !== "" && (
+        <article className="chat">
+          <div className="messages-container" ref={messagesContainerRef}>
+            <RenderMessages chats={chatData.chats[chatData.currentChat]} />
+          </div>
+          <div style={{ marginTop: "5px", display: "flex" }}>
+            <input
+              id="messageInput"
+              type="text"
+              placeholder="Type your message..."
+              style={{
+                flex: "1",
+                color: "#fff",
+                height: "30px",
+                fontSize: "16px",
+                border: "1px solid #ccc",
+                borderRadius: "5px 0 0 5px",
+                backgroundColor: "transparent",
+                padding: "5px",
+                outline: "none",
+              }}
+              value={chatData?.currentMessage}
+              onChange={(e) =>
+                setChatData((lastValue) => ({
+                  ...lastValue,
+                  currentMessage: e.target.value,
+                }))
+              }
+              onKeyDown={(e) => {
+                if (e.which === 13 && !e.shiftKey) {
+                  e.preventDefault();
+                  addMessage(
+                    chatData.currentMessage,
+                    chatData.currentChat,
+                    setChatData
+                  );
+                  return;
+                }
+              }}
+            />
+            <button
+              style={{ padding: "5px", cursor: "pointer" }}
+              className="button"
+              onClick={() =>
                 addMessage(
                   chatData.currentMessage,
                   chatData.currentChat,
                   setChatData
-                );
-                return;
+                )
               }
-            }}
-          />
-          <button
-            style={{ padding: "5px", cursor: "pointer" }}
-            className="button"
-            onClick={() =>
-              addMessage(
-                chatData.currentMessage,
-                chatData.currentChat,
-                setChatData
-              )
-            }
-          >
-            <svg
-              height="24"
-              width="24"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
             >
-              <path d="M0 0h24v24H0z" fill="none"></path>
-              <path
-                d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"
-                fill="currentColor"
-              ></path>
-            </svg>
-          </button>
-        </div>
-      </article>
+              <svg
+                height="24"
+                width="24"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M0 0h24v24H0z" fill="none"></path>
+                <path
+                  d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"
+                  fill="currentColor"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </article>
+      )}
     </main>
   );
 };

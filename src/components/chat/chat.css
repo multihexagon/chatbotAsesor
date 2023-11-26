@@ -1,49 +1,71 @@
-html{
-  height: 100vh;
+* {
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+}
+
+html {
   background-color: #363535;
 }
 
-main{
+main {
   display: flex;
-  justify-content:space-around;
-  height: 87vh;
+  height: 20px;
+  min-height: calc(100vh - 105px);
 }
 .button {
   cursor: pointer;
-  border: 2px solid #9966CC;
+  border: 2px solid #9966cc;
   border-radius: 0 5px 5px 0;
   width: 60px;
   height: 42px;
   color: white;
-  background-color: #9966CC;
+  background-color: #9966cc;
 }
 
 .button svg {
-  transition: all 0.3s;
+  transition: transform 0.3s;
 }
 
 .button:hover svg {
   transform: rotate(45deg);
 }
 
-.article{
+.article {
   width: 300px;
 }
 
-.message-container{
-  scrollbar-color: red yellow;
+.chat {
+  flex: 1;
+  max-width: 800px;
+  font-family: "Arial, sans-serif";
+  border: 1px solid white;
+  border-radius: 5px;
+  margin: 0 auto;
 }
 
-@media screen and (max-width: 768px) {
-  main{
-    height: 85vh;
-    gap: 20px;
-  }
-  .article-big{
-  margin-top: 15vh;
+.tabs {
+  border-right: 1px solid #ccc;
+  text-transform: capitalize;
+  color: white;
+  align-self: left;
+}
 
-  }
-  
+.clients {
+  cursor: pointer;
+  padding: 10px;
+}
+
+.selected {
+  background: white;
+  color: black;
+}
+
+.messages-container {
+  height: calc(100% - 67px);
+  border-radius: 5px;
+  overflow-y: scroll;
+  padding: 10px;
 }
 
 /* For webkit-based browsers (Chrome, Safari) */
