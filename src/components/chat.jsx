@@ -23,8 +23,7 @@ const getUser = async () => {
 };
 
 const socket = io("http://localhost:3000", {
-  auth: { token: await getUser() },
-  role: "adviser",
+  auth: { token: await getUser(), role: "adviser" },
 });
 
 function addMessage(text, currentChat, setter) {
@@ -42,16 +41,25 @@ function addMessage(text, currentChat, setter) {
       currentMessage: "",
     };
   });
-  // socket.emit("new message adviser", { message: newMessage });
+  socket.emit("new message adviser", {
+    message: newMessage,
+    client: currentChat,
+  });
 }
 
 const RenderTabs = ({ chats, activeChat, setChat }) => {
+  function handleClick(chatId) {
+    setChat((lastValue) => ({ ...lastValue, currentChat: chatId }));
+    socket.emit("enter room", {
+      room: chatId,
+      last: activeChat != "" && activeChat != chatId && activeChat,
+    });
+  }
+
   return Object.keys(chats).map((chatId) => (
     <div
       key={chatId}
-      onClick={() =>
-        setChat((lastValue) => ({ ...lastValue, currentChat: chatId }))
-      }
+      onClick={() => handleClick(chatId)}
       style={{
         padding: "10px",
         borderBottom:
@@ -70,18 +78,42 @@ const Chat = () => {
   const messagesContainerRef = useRef(null);
 
   useEffect(() => {
-    // socket.emit("join", { room: "asesor" });
     messagesContainerRef.current.scrollTop =
       messagesContainerRef.current.scrollHeight;
   }, [chatData]);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    socket.on("new message client get", ({ message }) => {
+      const messages = [
+        ...chatData.chats[chatData.currentChat].messages,
+        message,
+      ];
+
+      setChatData({
+        ...chatData,
+        chats: { ...chatData.chats, [chatData.currentChat]: { messages } },
+      });
+    });
+
+    socket.on("client", ({ token }) => {
+      alert(token + " Necesita que lo ayuden");
+    });
+
+    return () => {
+      socket.off("new message client get");
+      socket.off("client");
+    };
+  }, [chatData]);
 
   return (
     <main style={{ display: "flex" }}>
       {/* Sidebar with tabs */}
       <article style={{ width: "200px", borderRight: "1px solid #ccc" }}>
-        <RenderTabs chats={chatData.chats} activeChat={chatData.currentChat} setChat={setChatData} />
+        <RenderTabs
+          chats={chatData.chats}
+          activeChat={chatData.currentChat}
+          setChat={setChatData}
+        />
       </article>
       {/* Chat messages */}
       <article
@@ -125,7 +157,11 @@ const Chat = () => {
             onKeyDown={(e) => {
               if (e.which === 13 && !e.shiftKey) {
                 e.preventDefault();
-                addMessage(chatData.currentMessage, chatData.currentChat, setChatData);
+                addMessage(
+                  chatData.currentMessage,
+                  chatData.currentChat,
+                  setChatData
+                );
                 return;
               }
             }}
@@ -134,7 +170,11 @@ const Chat = () => {
             style={{ padding: "5px", cursor: "pointer" }}
             className="button"
             onClick={() =>
-              addMessage(chatData.currentMessage, chatData.currentChat, setChatData)
+              addMessage(
+                chatData.currentMessage,
+                chatData.currentChat,
+                setChatData
+              )
             }
           >
             <svg

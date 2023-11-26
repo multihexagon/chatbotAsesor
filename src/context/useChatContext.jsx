@@ -6,15 +6,11 @@ export const useChatContext = () => useContext(ChatContext);
 
 export default function ChatContextProvider({ children }) {
   const [chatData, setChatData] = useState({
-    currentChat: "ana",
+    currentChat: "",
     currentMessage: "",
     chats: {
-      ana: {
+      beautifulbear436 : {
         messages: [
-          {
-            from: "client",
-            text: "Hola mor",
-          },
         ],
       },
       juan: {
