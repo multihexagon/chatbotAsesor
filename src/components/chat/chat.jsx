@@ -32,7 +32,7 @@ const socket = io("http://localhost:3000", {
 function addMessage(text, currentChat, setter) {
   if (text === "" || text.startsWith(" ")) return;
   const newMessage = {
-    from: "client",
+    from: "You",
     text,
   };
   setter((lastValue) => {
