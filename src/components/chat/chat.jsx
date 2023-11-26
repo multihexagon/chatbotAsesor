@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
-//import { io } from "socket.io-client";
+import { io } from "socket.io-client";
 import "./chat.css";
 import { useChatContext } from "../../context/useChatContext";
+import ChatList from "../../context/chatList";
 import RenderMessages from "../messages/messages";
 import RenderTabs from "../tabs/tabs";
 
@@ -23,10 +24,10 @@ const getUser = async () => {
   return user;
 };
 
-//const socket = io("http://localhost:3000", {
-//  auth: { token: await getUser() },
-//  role: "adviser",
-//});
+const socket = io("http://localhost:3000", {
+  auth: { token: await getUser() },
+  role: "adviser",
+});
 
 function addMessage(text, currentChat, setter) {
   if (text === "" || text.startsWith(" ")) return;
@@ -43,7 +44,7 @@ function addMessage(text, currentChat, setter) {
       currentMessage: "",
     };
   });
-  // socket.emit("new message adviser", { message: newMessage });
+  socket.emit("new message", { message: newMessage });
 }
 
 
@@ -54,17 +55,18 @@ const Chat = () => {
   const messagesContainerRef = useRef(null);
 
   useEffect(() => {
-    // socket.emit("join", { room: "asesor" });
+    socket.emit("join", { room: "asesor" });
     messagesContainerRef.current.scrollTop =
       messagesContainerRef.current.scrollHeight;
   }, [chatData]);
 
-  useEffect(() => {}, []);
+  // useEffect(() => {}, []);
 
   return (
     <main style={{ display: "flex" }}>
       {/* Sidebar with tabs */}
-      <article className="article" style={{borderRight: "1px solid #9966CC" }}>
+      <article className="article" style={{ borderRight: "1px solid #9966CC" }}>
+        {/* <ChatList chats={chatData.chats} currentChat={chatData.currentChat} setChat={setChatData} /> */}
         <RenderTabs chats={chatData.chats} activeChat={chatData.currentChat} setChat={setChatData} />
       </article>
       {/* Chat messages */}
@@ -105,9 +107,9 @@ const Chat = () => {
               borderRadius: "5px 0 0 5px",
               backgroundColor: "transparent",
               padding: "5px",
-              outline: "none",  
+              outline: "none",
             }}
-            value={chatData.currentMessage}
+            value={chatData?.currentMessage}
             onChange={(e) =>
               setChatData((lastValue) => ({
                 ...lastValue,
