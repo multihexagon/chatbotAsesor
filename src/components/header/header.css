@@ -1,0 +1,12 @@
+.header{
+    height: 100px;
+    display: flex;
+    border-bottom: 1px solid #9966CC ;
+}
+
+.header img{
+    height: 100px;
+    width: 200px;
+    border-radius: 50%;
+    margin-left: 20px;
+}

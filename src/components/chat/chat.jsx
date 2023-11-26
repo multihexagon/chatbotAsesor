@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import "./chat.css";
-import { useChatContext } from "../context/useChatContext";
-import RenderMessages from "./messages";
+import { useChatContext } from "../../context/useChatContext";
+// import ChatList from "../../context/chatList";
+import RenderMessages from "../messages/messages";
+import RenderTabs from "../tabs/tabs";
 
 const getUser = async () => {
   let user = localStorage.getItem("user");
@@ -29,7 +31,7 @@ const socket = io("http://localhost:3000", {
 function addMessage(text, currentChat, setter) {
   if (text === "" || text.startsWith(" ")) return;
   const newMessage = {
-    from: "client",
+    from: "You",
     text,
   };
   setter((lastValue) => {
@@ -46,31 +48,6 @@ function addMessage(text, currentChat, setter) {
     client: currentChat,
   });
 }
-
-const RenderTabs = ({ chats, activeChat, setChat }) => {
-  function handleClick(chatId) {
-    setChat((lastValue) => ({ ...lastValue, currentChat: chatId }));
-    socket.emit("enter room", {
-      room: chatId,
-      last: activeChat != "" && activeChat != chatId && activeChat,
-    });
-  }
-
-  return Object.keys(chats).map((chatId) => (
-    <div
-      key={chatId}
-      onClick={() => handleClick(chatId)}
-      style={{
-        padding: "10px",
-        borderBottom:
-          activeChat === chatId ? "2px solid #4CAF50" : "2px solid transparent",
-        cursor: "pointer",
-      }}
-    >
-      {chatId}
-    </div>
-  ));
-};
 
 const Chat = () => {
   const { chatData, setChatData } = useChatContext();
@@ -113,22 +90,26 @@ const Chat = () => {
           chats={chatData.chats}
           activeChat={chatData.currentChat}
           setChat={setChatData}
+          socket={socket}
         />
       </article>
       {/* Chat messages */}
       <article
+        className="article-big"
         style={{
           flex: "1",
-          maxWidth: "400px",
+          maxWidth: "800px",
           margin: "auto",
           fontFamily: "Arial, sans-serif",
+          border: "none",
+          marginTop: "45vh",
         }}
       >
         <div
+          className="messages-container"
           ref={messagesContainerRef}
           style={{
             height: "300px",
-            border: "1px solid #ccc",
             borderRadius: "5px",
             overflowY: "scroll",
             padding: "10px",
@@ -136,18 +117,23 @@ const Chat = () => {
         >
           <RenderMessages chats={chatData.chats[chatData.currentChat]} />
         </div>
-        <div style={{ marginTop: "10px", display: "flex" }}>
+        <div style={{ marginTop: "20px", display: "flex" }}>
           <input
             id="messageInput"
             type="text"
             placeholder="Type your message..."
             style={{
               flex: "1",
-              marginRight: "10px",
+              color: "#fff",
+              height: "30px",
+              fontSize: "16px",
+              border: "1px solid #ccc",
+              borderRadius: "5px 0 0 5px",
+              backgroundColor: "transparent",
               padding: "5px",
               outline: "none",
             }}
-            value={chatData.currentMessage}
+            value={chatData?.currentMessage}
             onChange={(e) =>
               setChatData((lastValue) => ({
                 ...lastValue,

@@ -5,7 +5,7 @@ const RenderMessages = ({ chats }) => {
       style={{
         marginBottom: "10px",
         textAlign: message.from === "Usuario" ? "left" : "right",
-        backgroundColor: message.from === "Usuario" ? "#eee" : "#0084ff",
+        backgroundColor: message.from === "Usuario" ? "#eee" : "#9966CC",
         color: message.from === "Usuario" ? "#000" : "#fff",
         padding: "10px",
         borderRadius: "5px",
