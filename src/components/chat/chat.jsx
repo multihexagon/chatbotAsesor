@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import "./chat.css";
 import { useChatContext } from "../../context/useChatContext";
-// import ChatList from "../../context/chatList";
+
 import RenderMessages from "../messages/messages";
 import RenderTabs from "../tabs/tabs";
 import Swal from "sweetalert2";
@@ -32,7 +32,7 @@ const socket = io("http://localhost:3000", {
 function addMessage(text, currentChat, setter) {
   if (text === "" || text.startsWith(" ")) return;
   const newMessage = {
-    from: "You",
+    from: "adviser",
     text,
   };
   setter((lastValue) => {
@@ -76,7 +76,15 @@ const Chat = () => {
       });
     });
 
-    socket.on("client", ({ token }) => {
+    socket.on("client", async ({ token }) => {
+      const data = await fetch(`http://localhost:3000/${token}`);
+      let messages = [];
+
+      if (data.ok) {
+        const chat = await data.json();
+        messages = Object.values(chat);
+      }
+
       Swal.fire({
         title: `Start chat with ${token} `,
         showDenyButton: true,
@@ -94,7 +102,7 @@ const Chat = () => {
 
             return {
               ...lastValue,
-              chats: { ...lastValue.chats, [token]: { messages: [] } },
+              chats: { ...lastValue.chats, [token]: { messages } },
               currentChat: token,
             };
           });
