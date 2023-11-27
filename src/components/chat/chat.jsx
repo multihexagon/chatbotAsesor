@@ -5,6 +5,7 @@ import { useChatContext } from "../../context/useChatContext";
 // import ChatList from "../../context/chatList";
 import RenderMessages from "../messages/messages";
 import RenderTabs from "../tabs/tabs";
+import Swal from "sweetalert2";
 
 const getUser = async () => {
   let user = localStorage.getItem("user");
@@ -56,7 +57,6 @@ const Chat = () => {
 
   useEffect(() => {
     if (messagesContainerRef.current !== null) {
-      console.log(messagesContainerRef)
       messagesContainerRef.current.scrollTop =
         messagesContainerRef.current.scrollHeight;
     }
@@ -77,7 +77,32 @@ const Chat = () => {
     });
 
     socket.on("client", ({ token }) => {
-      alert(token + " Necesita que lo ayuden");
+      Swal.fire({
+        title: `Start chat with ${token} `,
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: "Start",
+        denyButtonText: `Maybe later`,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setChatData((lastValue) => {
+            socket.emit("enter room", {
+              room: [token],
+              last: lastValue.activeChat != "" &&
+                lastValue.activeChat != [token] && [token],
+            });
+
+            return {
+              ...lastValue,
+              chats: { ...lastValue.chats, [token]: { messages: [] } },
+              currentChat: token,
+            };
+          });
+        }
+        // else if (result.isDenied) {
+        //   Swal.fire("Recuerda responder ", "", "info");
+        // }
+      });
     });
 
     return () => {
