@@ -66,6 +66,8 @@ main {
   border-radius: 5px;
   overflow-y: scroll;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* For webkit-based browsers (Chrome, Safari) */
