@@ -5,7 +5,7 @@ import { useChatContext } from "../../context/useChatContext";
 
 import RenderMessages from "../messages/messages";
 import RenderTabs from "../tabs/tabs";
-import Swal from "sweetalert2";
+import toast, { Toaster } from "react-hot-toast";
 
 const getUser = async () => {
   let user = localStorage.getItem("user");
@@ -50,6 +50,26 @@ function addMessage(text, currentChat, setter) {
   });
 }
 
+function createNewChat(token, messages, setChatData) {
+  setChatData((lastValue) => {
+    socket.emit("enter room", {
+      room: token,
+      last:
+        lastValue.activeChat != "" && lastValue.activeChat != token
+          ? token
+          : lastValue.activeChat,
+    });
+
+    toast.dismiss();
+
+    return {
+      ...lastValue,
+      chats: { ...lastValue.chats, [token]: { messages, alert: 0 } },
+      currentChat: token,
+    };
+  });
+}
+
 const Chat = () => {
   const { chatData, setChatData } = useChatContext();
 
@@ -69,6 +89,7 @@ const Chat = () => {
           ...lastValue.chats[lastValue.currentChat].messages,
           message,
         ];
+
         return {
           ...lastValue,
           chats: { ...lastValue.chats, [lastValue.currentChat]: { messages } },
@@ -77,6 +98,8 @@ const Chat = () => {
     });
 
     socket.on("client", async ({ token }) => {
+      toast.dismiss();
+
       const data = await fetch(`http://localhost:3000/${token}`);
       let messages = [];
 
@@ -85,42 +108,47 @@ const Chat = () => {
         messages = Object.values(chat);
       }
 
-      Swal.fire({
-        title: `Start chat with ${token} `,
-        showDenyButton: true,
-        showCancelButton: true,
-        confirmButtonText: "Start",
-        denyButtonText: `Maybe later`,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          setChatData((lastValue) => {
-            socket.emit("enter room", {
-              room: [token],
-              last: lastValue.activeChat != "" &&
-                lastValue.activeChat != [token] && [token],
-            });
-
-            return {
-              ...lastValue,
-              chats: { ...lastValue.chats, [token]: { messages } },
-              currentChat: token,
-            };
-          });
+      setChatData((lastValue) => {
+        if (lastValue.chats[token] !== undefined) {
+          return {
+            ...lastValue,
+            chats: {
+              ...lastValue.chats,
+              [token]: { messages, alert: lastValue.chats[token].alert + 1 },
+            },
+          };
         }
-        // else if (result.isDenied) {
-        //   Swal.fire("Recuerda responder ", "", "info");
-        // }
+        
+        console.log(lastValue)
+
+        toast(() => (
+          <span
+            onClick={() => createNewChat(token, messages, setChatData)}
+            style={{ cursor: "pointer" }}
+          >
+            {token} Necestia ayuda, entra!
+          </span>
+        ));
+      });
+    });
+
+    socket.on("full", ({ room }) => {
+      setChatData((lastValue) => {
+        const { [room]: value, ...rest } = lastValue.chats;
+        return { ...lastValue, chats: { ...rest }, currentChat: "" };
       });
     });
 
     return () => {
       socket.off("new message client get");
       socket.off("client");
+      socket.off("full");
     };
   }, []);
 
   return (
     <main>
+      <Toaster />
       {/* Sidebar with tabs */}
       <article className="tabs">
         <RenderTabs
