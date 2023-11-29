@@ -22,7 +22,7 @@ const RenderTabs = ({ chats, activeChat, setChat, socket }) => {
       currentChat: chatId,
       chats: {
         ...lastValue.chats,
-        [chatId]: { messages, alert: 0 },
+        [chatId]: { messages, alert: '' },
       },
     }));
   }

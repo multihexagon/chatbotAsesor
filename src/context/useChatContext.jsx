@@ -8,6 +8,7 @@ export default function ChatContextProvider({ children }) {
   const [chatData, setChatData] = useState({
     currentChat: "",
     currentMessage: "",
+    loggedIn: null,
     chats: {
       beautifulbear436: {
         messages: [],

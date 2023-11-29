@@ -7,27 +7,25 @@ import RenderMessages from "../messages/messages";
 import RenderTabs from "../tabs/tabs";
 import toast, { Toaster } from "react-hot-toast";
 
-const getUser = async () => {
-  let user = localStorage.getItem("user");
-  if (!user) {
-    const req = await fetch("https://randomuser.me/api/");
+// const getUser = async () => {
+//   let user = localStorage.getItem("user");
+//   if (!user) {
+//     const req = await fetch("https://randomuser.me/api/");
 
-    const res = await req.json();
+//     const res = await req.json();
 
-    const {
-      login: { username },
-    } = res.results[0];
+//     const {
+//       login: { username },
+//     } = res.results[0];
 
-    user = username;
-    localStorage.setItem("user", user);
-  }
+//     user = username;
+//     localStorage.setItem("user", user);
+//   }
 
-  return user;
-};
+//   return user;
+// };
 
-const socket = io("http://localhost:3000", {
-  auth: { token: await getUser(), role: "adviser" },
-});
+let socket;
 
 function addMessage(text, currentChat, setter) {
   if (text === "" || text.startsWith(" ")) return;
@@ -60,7 +58,7 @@ function createNewChat(token, messages, lastValue, setChatData) {
 
   setChatData({
     ...lastValue,
-    chats: { ...lastValue.chats, [token]: { messages, alert: 0 } },
+    chats: { ...lastValue.chats, [token]: { messages, alert: "" } },
     currentChat: token,
   });
 }
@@ -78,6 +76,10 @@ const Chat = () => {
   }, [chatData]);
 
   useEffect(() => {
+    socket = io("http://localhost:3000", {
+      auth: { token: chatData.loggedIn, role: "adviser" },
+    });
+
     socket.on("new message client get", ({ message }) => {
       setChatData((lastValue) => {
         const messages = [
@@ -108,7 +110,7 @@ const Chat = () => {
             ...lastValue,
             chats: {
               ...lastValue.chats,
-              [token]: { messages, alert: 1 },
+              [token]: { messages, alert: "!!" },
             },
           };
         }
@@ -128,6 +130,8 @@ const Chat = () => {
 
     socket.on("full", ({ room }) => {
       setChatData((lastValue) => {
+        toast(() => <span>Usuario ya esta siendo atendido</span>);
+        // eslint-disable-next-line no-unused-vars
         const { [room]: value, ...rest } = lastValue.chats;
         return { ...lastValue, chats: { ...rest }, currentChat: "" };
       });
