@@ -12,6 +12,11 @@ const RenderTabs = ({ chats, activeChat, setChat, socket }) => {
       messages = Object.values(chat);
     }
 
+    socket.emit("enter room", {
+      room: chatId,
+      last: activeChat,
+    });
+
     setChat((lastValue) => ({
       ...lastValue,
       currentChat: chatId,
@@ -20,10 +25,6 @@ const RenderTabs = ({ chats, activeChat, setChat, socket }) => {
         [chatId]: { messages, alert: 0 },
       },
     }));
-    socket.emit("enter room", {
-      room: chatId,
-      last: activeChat != "" || activeChat != chatId ? activeChat : chatId,
-    });
   }
 
   return Object.keys(chats).map((chatId) => (

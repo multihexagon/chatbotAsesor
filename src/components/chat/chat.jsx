@@ -50,23 +50,18 @@ function addMessage(text, currentChat, setter) {
   });
 }
 
-function createNewChat(token, messages, setChatData) {
-  setChatData((lastValue) => {
-    socket.emit("enter room", {
-      room: token,
-      last:
-        lastValue.activeChat != "" && lastValue.activeChat != token
-          ? token
-          : lastValue.activeChat,
-    });
+function createNewChat(token, messages, lastValue, setChatData) {
+  socket.emit("enter room", {
+    room: token,
+    last: lastValue.currentChat,
+  });
 
-    toast.dismiss();
+  toast.dismiss();
 
-    return {
-      ...lastValue,
-      chats: { ...lastValue.chats, [token]: { messages, alert: 0 } },
-      currentChat: token,
-    };
+  setChatData({
+    ...lastValue,
+    chats: { ...lastValue.chats, [token]: { messages, alert: 0 } },
+    currentChat: token,
   });
 }
 
@@ -99,7 +94,6 @@ const Chat = () => {
 
     socket.on("client", async ({ token }) => {
       toast.dismiss();
-
       const data = await fetch(`http://localhost:3000/${token}`);
       let messages = [];
 
@@ -114,21 +108,21 @@ const Chat = () => {
             ...lastValue,
             chats: {
               ...lastValue.chats,
-              [token]: { messages, alert: lastValue.chats[token].alert + 1 },
+              [token]: { messages, alert: 1 },
             },
           };
         }
-        
-        console.log(lastValue)
-
         toast(() => (
           <span
-            onClick={() => createNewChat(token, messages, setChatData)}
+            onClick={() =>
+              createNewChat(token, messages, lastValue, setChatData)
+            }
             style={{ cursor: "pointer" }}
           >
             {token} Necestia ayuda, entra!
           </span>
         ));
+        return { ...lastValue };
       });
     });
 
